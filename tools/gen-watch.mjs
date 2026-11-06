@@ -100,39 +100,39 @@ function strap() {
 function caseback() {
   let nd = '';
   for (let i = 0; i < 6; i++) nd += rectSeg(-7, -146, 14, 9, i * 60 + 30);
-  const notches = `<path d="${nd}" fill="${C.brassD}"/>`;
+  const notches = `<path d="${nd}" fill="#55575b"/>`;
   return `<g class="part" id="p-back" data-part="08"><g class="tilt">
     <circle r="146" fill="url(#gCase)"/>
-    <circle r="146" fill="none" stroke="${C.brassD}" stroke-width="1" class="ln"/>${notches}
-    <circle r="132" fill="none" stroke="${C.brassL}" stroke-width="1.2" opacity=".55"/>
+    <circle r="146" fill="none" stroke="#55575b" stroke-width="1" class="ln"/>${notches}
+    <circle r="132" fill="none" stroke="#d8dade" stroke-width="1.2" opacity=".55"/>
     <path id="backArc" d="M-116 0a116 116 0 1 1 232 0a116 116 0 1 1 -232 0" fill="none"/>
-    <text font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="3" fill="#5a4220"><textPath href="#backArc">КАЛИБР · МОСКВА · № 0427 · ЛАТУНЬ · ВОДОЗАЩИТА 5 АТМ · СДЕЛАНО ВРУЧНУЮ ·</textPath></text>
+    <text font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="3" fill="#3c3e42"><textPath href="#backArc">КАЛИБР · МОСКВА · № 0427 · ЛАТУНЬ · ВОДОЗАЩИТА 5 АТМ · СДЕЛАНО ВРУЧНУЮ ·</textPath></text>
     <circle r="100" fill="#15130f"/>
     <circle r="100" fill="url(#gGlass)" opacity=".8"/>
-    <circle r="100" fill="none" stroke="${C.brassL}" stroke-width="2"/>
+    <circle r="100" fill="none" stroke="#d8dade" stroke-width="2"/>
   </g></g>`;
 }
 
 function crown() {
   let fd = '';
   for (let y = -19; y <= 19; y += 4.75) fd += `M168 ${f(y)}H190`;
-  const flutes = `<path d="${fd}" stroke="${C.brassD}" stroke-width="1.2" opacity=".8"/>`;
+  const flutes = `<path d="${fd}" stroke="#55575b" stroke-width="1.2" opacity=".8"/>`;
   return `<g class="part" id="p-crown" data-part="09"><g class="tilt">
     <rect x="138" y="-3" width="34" height="6" rx="1.5" fill="#b9b5ab"/>
-    <rect x="152" y="-12" width="17" height="24" rx="3" fill="url(#gBrass)"/>
-    <rect x="166" y="-22" width="26" height="44" rx="6" fill="url(#gBrass)"/>${flutes}
-    <rect x="166" y="-22" width="26" height="44" rx="6" fill="none" stroke="${C.brassD}" stroke-width="1" class="ln"/>
+    <rect x="152" y="-12" width="17" height="24" rx="3" fill="url(#gSteel)"/>
+    <rect x="166" y="-22" width="26" height="44" rx="6" fill="url(#gSteel)"/>${flutes}
+    <rect x="166" y="-22" width="26" height="44" rx="6" fill="none" stroke="#55575b" stroke-width="1" class="ln"/>
   </g></g>`;
 }
 
 function caseMid() {
-  const lug = (sx, sy) => `<path d="M${sx * 52} ${sy * 122} L${sx * 56} ${sy * 186} Q${sx * 57} ${sy * 194} ${sx * 66} ${sy * 194} L${sx * 82} ${sy * 194} Q${sx * 90} ${sy * 194} ${sx * 90} ${sy * 184} L${sx * 92} ${sy * 112} Z" fill="url(#gBrass)" stroke="${C.brassD}" stroke-width=".8"/>`;
+  const lug = (sx, sy) => `<path d="M${sx * 52} ${sy * 122} L${sx * 56} ${sy * 186} Q${sx * 57} ${sy * 194} ${sx * 66} ${sy * 194} L${sx * 82} ${sy * 194} Q${sx * 90} ${sy * 194} ${sx * 90} ${sy * 184} L${sx * 92} ${sy * 112} Z" fill="url(#gSteel)" stroke="#55575b" stroke-width=".8"/>`;
   return `<g class="part" id="p-case" data-part="07"><g class="tilt">
     ${lug(-1, -1)}${lug(1, -1)}${lug(-1, 1)}${lug(1, 1)}
     <path d="${ring(150, 128)}" fill="url(#gCase)" fill-rule="evenodd"/>
-    <circle r="150" fill="none" stroke="${C.brassD}" stroke-width="1" class="ln"/>
-    <circle r="128" fill="none" stroke="${C.brassD}" stroke-width="1" class="ln"/>
-    <path d="M-120 -80 A144 144 0 0 1 -40 -138" fill="none" stroke="#fff3d6" stroke-width="3" stroke-linecap="round" opacity=".45"/>
+    <circle r="150" fill="none" stroke="#55575b" stroke-width="1" class="ln"/>
+    <circle r="128" fill="none" stroke="#55575b" stroke-width="1" class="ln"/>
+    <path d="M-120 -80 A144 144 0 0 1 -40 -138" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity=".45"/>
   </g></g>`;
 }
 
@@ -184,8 +184,18 @@ function balanceBody() {
   return `<g transform="translate(-34 54)">${wheelSvg}</g>${cock}${jewel(-34, 54, 2.6)}`;
 }
 
-function balance() {
-  return `<g class="part" id="p-balance" data-part="06"><g class="tilt">${balanceBody()}</g></g>`;
+function rotor() {
+  // ротор автоподзавода: полудиск с «женевскими волнами» и подшипником в центре
+  const half = 'M-106 0A106 106 0 0 0 106 0L20 0A20 20 0 0 1 -20 0Z';
+  let balls = '';
+  for (let k = 0; k < 10; k++) { const [x, y] = pt(11, k * 36); balls += circSeg(x, y, 2.2); }
+  return `<g class="part" id="p-rotor" data-part="06"><g class="tilt">
+    <path d="${half}" fill="url(#gSteel)"/><path d="${half}" fill="url(#pStripes)"/>
+    <path d="${half}" fill="none" stroke="#55575b" stroke-width="1" class="ln"/>
+    <path d="M-100 8A100 100 0 0 0 100 8" fill="none" stroke="#ffffff" stroke-width="2" opacity=".35"/>
+    <circle r="16" fill="#3a3c40"/><path d="${balls}" fill="#d8dade"/><circle r="5" fill="url(#gBrass)"/>
+    <text y="62" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" letter-spacing="2" fill="#3c3e42">КАЛИБР · К-27</text>
+  </g></g>`;
 }
 
 function dialBody() {
@@ -194,7 +204,7 @@ function dialBody() {
     const five = i % 5 === 0;
     td += rectSeg(five ? -1.1 : -0.55, -114, five ? 2.2 : 1.1, five ? 8 : 5, i * 6);
   }
-  const ticks = `<path d="${td}" fill="${C.ink}"/>`;
+  const ticks = `<path d="${td}" fill="#d9d4c8"/>`;
   let idx = '', idxD = '';
   for (let i = 0; i < 12; i++) {
     if (i === 0) {
@@ -207,12 +217,12 @@ function dialBody() {
   idx += `<path d="${idxD}" fill="url(#gBrass)" stroke="${C.brassD}" stroke-width=".6"/>`;
   const nums = '';
   return `<circle r="118" fill="url(#gDial)"/>
-    <circle r="105" fill="none" stroke="${C.ink}" stroke-width=".6" opacity=".5"/>
-    <circle r="116" fill="none" stroke="${C.ink}" stroke-width=".6" opacity=".5"/>${ticks}${idx}${nums}
-    <text y="-42" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-size="17" font-weight="600" letter-spacing="4" fill="${C.ink}">КАЛИБР</text>
-    <text y="-29" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="6.5" letter-spacing="2" fill="#6b6253">МОСКВА</text>
-    <text y="50" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="6.5" letter-spacing="1.6" fill="#6b6253">МЕХАНИКА · 25 КАМНЕЙ</text>
-    <circle r="118" fill="none" stroke="${C.brassD}" stroke-width="1" class="ln"/>`;
+    <circle r="105" fill="none" stroke="#9a948a" stroke-width=".6" opacity=".5"/>
+    <circle r="116" fill="none" stroke="#9a948a" stroke-width=".6" opacity=".5"/>${ticks}${idx}${nums}
+    <text y="-42" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-size="17" font-weight="600" letter-spacing="4" fill="#e6dfcf">КАЛИБР</text>
+    <text y="-29" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="6.5" letter-spacing="2" fill="#9a948a">МОСКВА</text>
+    <text y="50" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="6.5" letter-spacing="1.6" fill="#9a948a">АВТОПОДЗАВОД · 25 КАМНЕЙ</text>
+    <circle r="118" fill="none" stroke="#55575b" stroke-width="1" class="ln"/>`;
 }
 
 function dial() {
@@ -220,10 +230,10 @@ function dial() {
 }
 
 function handsBody(h = 0, m = 0, s = 0) {
-  return `<g class="hand hand-h" transform="rotate(${h})"><path d="M0 -66 L5.2 -16 L2.6 10 L-2.6 10 L-5.2 -16Z" fill="${C.blue}" stroke="#0e1a2c" stroke-width=".6"/><path d="M0 -60 L1.4 -18 L-1.4 -18Z" fill="#7e9cc6" opacity=".55"/></g>
-    <g class="hand hand-m" transform="rotate(${m})"><path d="M0 -100 L4 -20 L2.2 12 L-2.2 12 L-4 -20Z" fill="${C.blue}" stroke="#0e1a2c" stroke-width=".6"/><path d="M0 -94 L1.1 -22 L-1.1 -22Z" fill="#7e9cc6" opacity=".55"/></g>
-    <g class="hand hand-s" transform="rotate(${s})"><path d="M-.7 -108 L.7 -108 L1.1 24 L-1.1 24Z" fill="${C.ruby}"/><circle cy="18" r="4.6" fill="${C.ruby}"/></g>
-    <circle r="5.4" fill="url(#gBrass)" stroke="${C.brassD}" stroke-width=".6"/><circle r="1.6" fill="${C.ink}"/>`;
+  return `<g class="hand hand-h" transform="rotate(${h})"><path d="M0 -66 L5.2 -16 L2.6 10 L-2.6 10 L-5.2 -16Z" fill="url(#gBrass)" stroke="#6a4f22" stroke-width=".6"/><path d="M0 -60 L1.4 -18 L-1.4 -18Z" fill="#fff3cf" opacity=".35"/></g>
+    <g class="hand hand-m" transform="rotate(${m})"><path d="M0 -100 L4 -20 L2.2 12 L-2.2 12 L-4 -20Z" fill="url(#gBrass)" stroke="#6a4f22" stroke-width=".6"/><path d="M0 -94 L1.1 -22 L-1.1 -22Z" fill="#fff3cf" opacity=".35"/></g>
+    <g class="hand hand-s" transform="rotate(${s})"><path d="M-.6 -108 L.6 -108 L1 24 L-1 24Z" fill="#e2c486"/><circle cy="18" r="3.4" fill="#e2c486"/></g>
+    <circle r="5.4" fill="url(#gBrass)" stroke="${C.brassD}" stroke-width=".6"/><circle r="1.6" fill="#2a2b2d"/>`;
 }
 
 function hands() {
@@ -233,12 +243,12 @@ function hands() {
 function bezel() {
   let gd = '';
   for (let i = 0; i < 120; i++) gd += rectSeg(-0.4, -146, 0.8, 6, i * 3);
-  const grain = `<path d="${gd}" fill="${C.brassD}" opacity=".55"/>`;
+  const grain = `<path d="${gd}" fill="#55575b" opacity=".55"/>`;
   return `<g class="part" id="p-bezel" data-part="02"><g class="tilt">
     <path d="${ring(146, 118)}" fill="url(#gBezel)" fill-rule="evenodd"/>${grain}
-    <circle r="146" fill="none" stroke="${C.brassD}" stroke-width="1" class="ln"/>
-    <circle r="118" fill="none" stroke="${C.brassD}" stroke-width="1.2" class="ln"/>
-    <circle r="124" fill="none" stroke="#fff1cf" stroke-width=".8" opacity=".5"/>
+    <circle r="146" fill="none" stroke="#55575b" stroke-width="1" class="ln"/>
+    <circle r="118" fill="none" stroke="#55575b" stroke-width="1.2" class="ln"/>
+    <circle r="124" fill="none" stroke="#ffffff" stroke-width=".8" opacity=".5"/>
   </g></g>`;
 }
 
@@ -253,9 +263,10 @@ function crystal() {
 
 const defs = `<defs>
   <linearGradient id="gBrass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#efd79f"/><stop offset=".38" stop-color="#c9a25b"/><stop offset=".72" stop-color="#8f6b33"/><stop offset="1" stop-color="#d9b672"/></linearGradient>
-  <linearGradient id="gBezel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3dda8"/><stop offset=".45" stop-color="#b98f4a"/><stop offset=".7" stop-color="#7a5a28"/><stop offset="1" stop-color="#e2c27f"/></linearGradient>
-  <radialGradient id="gCase" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#e0bf7c"/><stop offset=".6" stop-color="#a47c3d"/><stop offset="1" stop-color="#5e4520"/></radialGradient>
-  <radialGradient id="gDial" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#f3ecdb"/><stop offset=".75" stop-color="#e3d7bc"/><stop offset="1" stop-color="#cdbd9b"/></radialGradient>
+  <linearGradient id="gBezel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f5f6"/><stop offset=".45" stop-color="#a7a9ad"/><stop offset=".7" stop-color="#5d5f63"/><stop offset="1" stop-color="#dcdee1"/></linearGradient>
+  <linearGradient id="gSteel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eceef0"/><stop offset=".4" stop-color="#a2a4a8"/><stop offset=".72" stop-color="#5a5c60"/><stop offset="1" stop-color="#c9cbce"/></linearGradient>
+  <radialGradient id="gCase" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#e6e8ea"/><stop offset=".6" stop-color="#8e9094"/><stop offset="1" stop-color="#46484c"/></radialGradient>
+  <radialGradient id="gDial" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#3a3b3d"/><stop offset=".75" stop-color="#232426"/><stop offset="1" stop-color="#18191a"/></radialGradient>
   <linearGradient id="gPlate" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#dcd8cf"/><stop offset=".5" stop-color="#aaa69c"/><stop offset="1" stop-color="#77736a"/></linearGradient>
   <linearGradient id="gGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".2"/><stop offset=".5" stop-color="#fff" stop-opacity=".03"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
   <linearGradient id="gLeather" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2a1c13"/><stop offset=".5" stop-color="#4a3324"/><stop offset="1" stop-color="#2a1c13"/></linearGradient>
@@ -269,7 +280,7 @@ ${strap()}
 ${caseback()}
 ${crown()}
 ${caseMid()}
-${balance()}
+${rotor()}
 ${movement()}
 ${dial()}
 ${hands()}
@@ -279,10 +290,10 @@ ${crystal()}
 
 // ---------- статичные символы для «до/после» ----------
 function staticCase(id) {
-  const lugs = [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sy]) => `<path d="M${sx * 52} ${sy * 122} L${sx * 56} ${sy * 186} Q${sx * 57} ${sy * 194} ${sx * 66} ${sy * 194} L${sx * 82} ${sy * 194} Q${sx * 90} ${sy * 194} ${sx * 90} ${sy * 184} L${sx * 92} ${sy * 112} Z" fill="url(#gBrass)" stroke="${C.brassD}" stroke-width=".8"/>`).join('');
+  const lugs = [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sy]) => `<path d="M${sx * 52} ${sy * 122} L${sx * 56} ${sy * 186} Q${sx * 57} ${sy * 194} ${sx * 66} ${sy * 194} L${sx * 82} ${sy * 194} Q${sx * 90} ${sy * 194} ${sx * 90} ${sy * 184} L${sx * 92} ${sy * 112} Z" fill="url(#gSteel)" stroke="#55575b" stroke-width=".8"/>`).join('');
   return `<symbol id="${id}" viewBox="-230 -230 460 460">
     <path d="M-62 -190 L-60 -240 L60 -240 L62 -190Z M-62 190 L-60 240 L60 240 L62 190Z" fill="url(#gLeather)"/>
-    <rect x="152" y="-12" width="17" height="24" rx="3" fill="url(#gBrass)"/><rect x="166" y="-22" width="26" height="44" rx="6" fill="url(#gBrass)" stroke="${C.brassD}"/>
+    <rect x="152" y="-12" width="17" height="24" rx="3" fill="url(#gSteel)"/><rect x="166" y="-22" width="26" height="44" rx="6" fill="url(#gSteel)" stroke="#55575b"/>
     ${lugs}<path d="${ring(150, 128)}" fill="url(#gCase)" fill-rule="evenodd"/>
     <path d="${ring(146, 118)}" fill="url(#gBezel)" fill-rule="evenodd"/>
     ${dialBody()}${handsBody(305, 60, 200)}
@@ -292,9 +303,6 @@ function staticCase(id) {
 
 const symbols = `<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
 ${defs}
-<symbol id="sym-movement" viewBox="-130 -130 260 260">
-  <circle r="124" fill="url(#gCase)"/>${movementBody()}${balanceBody()}
-</symbol>
 ${staticCase('sym-watch')}
 </svg>`;
 
@@ -358,13 +366,11 @@ const file = join(root, 'index.html');
 let html = readFileSync(file, 'utf8');
 const put = (name, content) => {
   const re = new RegExp(`(<!-- GEN:${name} -->)[\\s\\S]*?(<!-- /GEN:${name} -->)`);
-  if (!re.test(html)) throw new Error('Нет маркера ' + name);
+  if (!re.test(html)) { console.warn('нет маркера', name); return; }
   html = html.replace(re, `$1\n${content}\n$2`);
 };
 put('watch', watch);
 put('sprite', symbols);
-put('dust', `<path d="${dust}"/>`);
-put('scratches', `<path d="${scratches}"/><path d="${scratches2}" opacity=".6"/>`);
 put('rate', rateSvg);
 put('ratetable', rateTable);
 writeFileSync(file, html);

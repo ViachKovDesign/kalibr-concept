@@ -84,7 +84,7 @@
   var hint = $('.stage-hint', scene);
 
   var R = 150;
-  var STACK = ['crystal', 'bezel', 'hands', 'dial', 'movement', 'balance', 'case', 'back'];
+  var STACK = ['crystal', 'bezel', 'hands', 'dial', 'movement', 'rotor', 'case', 'back'];
   var parts = {};
   $$('.part', watch).forEach(function (g) {
     parts[g.id.replace('p-', '')] = { g: g, tilt: $('.tilt', g), num: g.getAttribute('data-part') };
@@ -102,12 +102,11 @@
   var ANCHOR = {
     land: {
       crystal: [0, -121, 't'], bezel: [0, 146, 'b'], hands: [0, -40, 't'], dial: [0, 118, 'b'],
-      movement: [0, -112, 't'], balance: [-34, 88, 'b'], 'case': [0, -150, 't'], back: [0, 146, 'b'],
-      crown: [179, -22, 't'], strap: [-66, 168, 'b']
+      movement: [0, -112, 't'], rotor: [0, 106, 'b'], 'case': [0, -150, 't'], back: [0, 146, 'b']
     },
     port: {
       crystal: [121, 0], bezel: [146, 0], hands: [40, 0], dial: [118, 0], movement: [112, 0],
-      balance: [0, 54], 'case': [150, 0], back: [146, 0], crown: [192, 0]
+      rotor: [106, 20], 'case': [150, 0], back: [146, 0]
     }
   };
 
@@ -172,7 +171,7 @@
       cy = top + halfH + ((bottom - top - 2 * halfH) - span) / 2;
       STACK.forEach(function (id, i) { lay.off[id] = [0, (cy + i * gap - cy) / s]; });
       lay.exp = { x: cx, y: cy, s: s, k: k, gap: gap };
-      lay.off.crown = [20, lay.off['case'][1]];
+      lay.off.crown = lay.off['case'];
       lay.strap = 0;
       lay.colX = colX; lay.labelW = labelW; lay.top = top; lay.bottom = bottom;
     } else {
@@ -187,8 +186,8 @@
       cy = (regionTop + regionBottom) / 2;
       STACK.forEach(function (id, i) { lay.off[id] = [(i * gap) / s, 0]; });
       lay.exp = { x: cx, y: cy, s: s, k: k, gap: gap };
-      lay.off.crown = [lay.off['case'][0] + 20, -R * 1.2];
-      lay.strap = 1;
+      lay.off.crown = lay.off['case'];
+      lay.strap = 0;
       lay.topRow = topRow; lay.bottomRow = bottomRow;
     }
     return lay;
@@ -211,12 +210,10 @@
     calloutsG.textContent = '';
     axesG.textContent = '';
     var items = [];
-    var ids = STACK.concat(['crown']);
-    if (lay.mode === 'land') ids.push('strap');
-    ids.forEach(function (id) {
+    STACK.forEach(function (id) {
       var a = ANCHOR[lay.mode][id];
       var v = toView(lay, id, a[0], a[1]);
-      var num = id === 'strap' ? '10' : parts[id].num;
+      var num = parts[id].num;
       items.push({ id: id, num: num, ax: v[0], ay: v[1], row: a[2] });
     });
 
@@ -301,13 +298,13 @@
     // размерная линия Ø корпуса (только горизонтальный разлёт)
     lay.dim = null;
     if (lay.mode === 'land') {
-      var cTop = toView(lay, 'case', -R, -R), cBot = toView(lay, 'case', -R, R);
-      var dx = cTop[0] - 26;
+      var cTop = toView(lay, 'case', R, -R), cBot = toView(lay, 'case', R, R);
+      var dx = toView(lay, 'back', R, 0)[0] + 34;
       var dg = el('g', { 'class': 'co-dimg', opacity: 0 }, calloutsG);
       var y1 = toView(lay, 'case', 0, -R)[1], y2 = toView(lay, 'case', 0, R)[1];
-      el('path', { 'class': 'co-dim', d: 'M' + r2(dx - 8) + ' ' + r2(y1) + 'H' + r2(cTop[0] + 6) + 'M' + r2(dx - 8) + ' ' + r2(y2) + 'H' + r2(cBot[0] + 6) + 'M' + r2(dx) + ' ' + r2(y1) + 'V' + r2(y2) }, dg);
+      el('path', { 'class': 'co-dim', d: 'M' + r2(dx + 8) + ' ' + r2(y1) + 'H' + r2(cTop[0] - 6) + 'M' + r2(dx + 8) + ' ' + r2(y2) + 'H' + r2(cBot[0] - 6) + 'M' + r2(dx) + ' ' + r2(y1) + 'V' + r2(y2) }, dg);
       el('path', { 'class': 'co-dimarrow', d: 'M' + r2(dx) + ' ' + r2(y1) + 'l-4 12h8Z M' + r2(dx) + ' ' + r2(y2) + 'l-4 -12h8Z' }, dg);
-      var dt = el('text', { 'class': 'co-dimtext co-text', x: r2(dx - 8), y: r2((y1 + y2) / 2), transform: 'rotate(-90 ' + r2(dx - 8) + ' ' + r2((y1 + y2) / 2) + ')', 'text-anchor': 'middle' }, dg);
+      var dt = el('text', { 'class': 'co-dimtext co-text', x: r2(dx + 18), y: r2((y1 + y2) / 2), transform: 'rotate(-90 ' + r2(dx + 18) + ' ' + r2((y1 + y2) / 2) + ')', 'text-anchor': 'middle' }, dg);
       dt.textContent = 'Ø 39,0';
       lay.dim = dg;
     }
@@ -389,6 +386,7 @@
   }
 
   var trigger = null;
+  var photoMode = !!$('#ph');
   function initScene() {
     if (isStatic) {
       scene.classList.add('is-static');
@@ -398,10 +396,17 @@
     gsap.registerPlugin(ScrollTrigger);
     ScrollTrigger.config({ ignoreMobileResize: true });
     scene.classList.add('is-live');
-    applyLayout();
+    if (photoMode) {
+      scene.classList.add('mode-photo');
+      setupPhoto();
+      applyPhotoLayout();
+    } else {
+      scene.classList.add('mode-svg');
+      applyLayout();
+    }
     var tween = gsap.to(state, {
       p: 1, ease: 'none',
-      onUpdate: function () { render(state.p); },
+      onUpdate: function () { if (photoMode) renderPhoto(state.p); else render(state.p); },
       scrollTrigger: {
         trigger: scene, start: 'top top',
         end: function () { return '+=' + Math.round(window.innerHeight * (mode === 'land' ? 2.6 : 2.2)); },
@@ -416,10 +421,264 @@
         // на телефоне меняется только высота из-за адресной строки — пересчитываем, только если изменилась ширина или высота заметно
         if (window.innerWidth === lastW && Math.abs(window.innerHeight - lastH) < 120) return;
         lastW = window.innerWidth; lastH = window.innerHeight;
-        applyLayout();
+        if (photoMode) applyPhotoLayout(); else applyLayout();
         ScrollTrigger.refresh();
       }, 150);
     });
+  }
+
+
+  /* ---------- 3б. Фото-разборка ---------- */
+  var ph = $('#ph'), phWorld = $('#ph-world'), phStack = $('#ph-stack'), phCo = $('#ph-callouts'), phLoupe = $('#ph-loupe');
+  var heroPhoto = $('.hero-photo');
+  var PH_ORDER = ['02', '03', '05', '04', '06', '07', '08', '09'];            // сверху вниз
+  var PH_POS = { '02': '01', '03': '02', '05': '03', '04': '04', '06': '05', '07': '06', '08': '07', '09': '08' };
+  var PH_R = { '02': 690, '03': 845, '05': 70, '04': 650, '06': 560, '07': 540, '08': 850, '09': 800 }; // радиус до точки выноски, px холста
+  var PH_AY = { '02': 0, '03': 0, '05': -15, '04': -15, '06': -10, '07': 40, '08': 0, '09': 0 };
+  var HUB01 = { x: 986 / 2048, y: 706 / 2048, caseW: 1557 / 2048 };      // ось стрелок и ширина корпуса на фото 01
+  var CASE_W = 1794 / 2048;                                                // ширина корпуса на холсте слоя
+  var CXR = 950 / 2048, CYR = 700 / 2048, HUBX = 952 / 2048, HUBY = 685 / 2048;
+  var phEls = {}, PL = null;
+  if (phStack) $$('.ph-layer', phStack).forEach(function (n) { phEls[n.getAttribute('data-id')] = n; });
+
+  function fallbackToSvg() {
+    if (!photoMode) return;
+    photoMode = false;
+    scene.classList.remove('mode-photo');
+    scene.classList.add('mode-svg');
+    if (phCo) phCo.textContent = '';
+    if (!isStatic && scene.classList.contains('is-live')) {
+      applyLayout();
+      render(state.p);
+      if (window.ScrollTrigger) ScrollTrigger.refresh();
+    }
+  }
+  if (ph) {
+    var heroImg = heroPhoto && $('img', heroPhoto);
+    $$('img', ph).concat(heroImg ? [heroImg] : []).forEach(function (img) {
+      img.addEventListener('error', fallbackToSvg);
+    });
+    if (heroImg && heroImg.complete && heroImg.naturalWidth === 0) photoMode = false;
+  }
+
+  function setupPhoto() {
+    // фото hero переезжает в «мир» сцены: дальше его двигает прокрутка
+    if (heroPhoto && heroPhoto.parentNode !== phWorld) phWorld.insertBefore(heroPhoto, phStack);
+  }
+
+  function computePhotoLayout() {
+    var w = scene.clientWidth, h = scene.clientHeight;
+    var portrait = w / h < 1.1 || w < 860;
+    mode = portrait ? 'port' : 'land';
+    var hU = 68;
+    var headH = razborHead.getBoundingClientRect().height;
+    var lay = { w: w, h: h, mode: mode };
+    heroPhoto.style.transform = '';
+    var hr = heroPhoto.getBoundingClientRect(), sr = scene.getBoundingClientRect();
+    lay.hero = { left: hr.left - sr.left, top: hr.top - sr.top, d: hr.width };
+    var top, bottom, avail, Wd, gx, gy, X0, Y0;
+    if (!portrait) {
+      top = hU + headH + 48; bottom = h - 34; avail = bottom - top;
+      Wd = Math.min(avail / 1.95, w * 0.3);
+      gy = Math.min((avail - 0.5 * Wd) / 7, 0.32 * Wd);
+      gx = 0.3 * Wd;
+      X0 = w / 2;
+      Y0 = top + 0.21 * Wd + 3.5 * gy + Math.max(0, (avail - 7 * gy - 0.5 * Wd) / 2);
+    } else {
+      var labelW = Math.min(176, w * 0.44);
+      top = hU + headH + 26; bottom = h - 14; avail = bottom - top;
+      gx = 3;
+      Wd = Math.min((w - labelW - 6 - 24 - 7 * gx) / 0.97, avail / 1.6);
+      gy = Math.min((avail - 0.5 * Wd) / 7, 0.4 * Wd);
+      X0 = 10 + 0.46 * Wd + 3.5 * gx;
+      Y0 = top + 0.21 * Wd + 3.5 * gy + Math.max(0, (avail - 7 * gy - 0.5 * Wd) / 2);
+      lay.colX = w - labelW - 6;
+    }
+    lay.Wd = Wd; lay.gx = gx; lay.gy = gy; lay.X0 = X0; lay.Y0 = Y0;
+    // стопка в состоянии hero: ось циферблата совпадает с осью стрелок на фото 01, корпус — по ширине
+    var hd = lay.hero.d;
+    var Wh = hd * HUB01.caseW / CASE_W;
+    lay.H = {
+      x: lay.hero.left + HUB01.x * hd - (HUBX - CXR) * Wh,
+      y: lay.hero.top + HUB01.y * hd - (HUBY - CYR) * Wh,
+      Wd: Wh
+    };
+    return lay;
+  }
+
+  function buildPhotoCallouts(lay) {
+    phCo.textContent = '';
+    phCo.setAttribute('viewBox', '0 0 ' + r2(lay.w) + ' ' + r2(lay.h));
+    phCo.classList.toggle('is-port', lay.mode === 'port');
+    var u = lay.Wd / 2048, items = [];
+    var c0 = [lay.X0 - 3.5 * lay.gx, lay.Y0 - 3.5 * lay.gy], c7 = [lay.X0 + 3.5 * lay.gx, lay.Y0 + 3.5 * lay.gy];
+    var ext = 0.5 * lay.Wd, len = Math.hypot(c7[0] - c0[0], c7[1] - c0[1]) || 1;
+    var ux = (c7[0] - c0[0]) / len, uy = (c7[1] - c0[1]) / len;
+    lay.axis = el('path', { 'class': 'co-axis', d: 'M' + r2(c0[0] - ux * ext) + ' ' + r2(c0[1] - uy * ext) + 'L' + r2(c7[0] + ux * ext) + ' ' + r2(c7[1] + uy * ext) }, phCo);
+    PH_ORDER.forEach(function (id, i) {
+      var cx = lay.X0 + (i - 3.5) * lay.gx, cy = lay.Y0 + (i - 3.5) * lay.gy;
+      var side = lay.mode === 'port' ? 1 : (i < 4 ? 1 : -1);
+      var num = PH_POS[id];
+      var it = { id: id, num: num, side: side, ax: cx + side * PH_R[id] * u, ay: cy + PH_AY[id] * u };
+      var g = el('g', { 'class': 'co', opacity: 0 }, phCo);
+      it.line = el('path', { 'class': 'co-line' }, g);
+      it.dot = el('circle', { 'class': 'co-dot', r: 3 }, g);
+      it.t = el('g', { 'class': 'co-label' }, g);
+      var tn = el('text', { 'class': 'co-num co-text', x: 0, y: -8 }, it.t); tn.textContent = num;
+      var tname = el('text', { 'class': 'co-name co-text', x: lay.mode === 'port' ? 24 : 28, y: -8 }, it.t); tname.textContent = info[num].name;
+      var tspec = el('text', { 'class': 'co-spec co-text', x: 0, y: lay.mode === 'port' ? 15 : 17 }, it.t); tspec.textContent = info[num].spec;
+      it.shelf = el('path', { 'class': 'co-line' }, it.t);
+      it.w = Math.max((lay.mode === 'port' ? 24 : 28) + tname.getComputedTextLength(), tspec.getComputedTextLength()) + 6;
+      it.g = g;
+      items.push(it);
+    });
+    var gap = lay.mode === 'port' ? 46 : 52;
+    var place = function (list) {
+      list.sort(function (a, b) { return a.ay - b.ay; });
+      var yy = -1e9;
+      list.forEach(function (i) { i.ly = Math.max(i.ay, yy); yy = i.ly + gap; });
+      var over = list.length ? list[list.length - 1].ly + 24 - lay.h + 8 : 0;
+      for (var m = list.length - 1; m >= 0 && over > 0; m--) {
+        var lim = m === 0 ? 70 : list[m - 1].ly + gap;
+        var mv = Math.min(list[m].ly - lim, over);
+        for (var z = m; z < list.length; z++) list[z].ly -= mv;
+        over -= mv;
+      }
+    };
+    if (lay.mode === 'port') {
+      place(items);
+      items.forEach(function (i) { i.lx = lay.colX; });
+    } else {
+      var right = items.filter(function (i) { return i.side > 0; }), left = items.filter(function (i) { return i.side < 0; });
+      var maxW = Math.max.apply(null, items.map(function (i) { return i.w; }));
+      var colR = Math.min(Math.max.apply(null, right.map(function (i) { return i.ax; })) + 48, lay.w - maxW - 20);
+      var colL = Math.max(Math.min.apply(null, left.map(function (i) { return i.ax; })) - 48, maxW + 20);
+      place(right); place(left);
+      right.forEach(function (i) { i.lx = colR; });
+      left.forEach(function (i) { i.lx = colL - i.w; i.endX = colL; });
+    }
+    items.forEach(function (it) {
+      it.t.setAttribute('transform', 'translate(' + r2(it.lx) + ' ' + r2(it.ly) + ')');
+      it.shelf.setAttribute('d', 'M0 0H' + r2(it.w));
+      var ex = it.side > 0 ? it.lx : it.lx + it.w, ey = it.ly;
+      it.line.setAttribute('d', 'M' + r2(it.ax) + ' ' + r2(it.ay) + 'L' + r2(ex) + ' ' + r2(ey));
+      it.dot.setAttribute('cx', r2(it.ax)); it.dot.setAttribute('cy', r2(it.ay));
+      it.len = Math.hypot(ex - it.ax, ey - it.ay) + 1;
+      it.line.style.strokeDasharray = it.len;
+      it.shelfLen = it.w;
+      it.shelf.style.strokeDasharray = it.w;
+      it.texts = $$('text', it.t);
+    });
+    lay.items = items;
+  }
+
+  function renderPhoto(p) {
+    if (!PL) return;
+    var lay = PL;
+    var a = ease(seg(p, 0, 0.24));
+    var e = ease(seg(p, 0.2, 0.64));
+    var c = seg(p, 0.6, 0.94);
+    var fade = seg(p, 0.1, 0.24);
+    var sx = lerp(lay.H.x, lay.X0, a), sy = lerp(lay.H.y, lay.Y0, a), W = lerp(lay.H.Wd, lay.Wd, a);
+    var k = W / lay.Wd;
+    PH_ORDER.forEach(function (id, i) {
+      var n = phEls[id];
+      var cx = sx + (i - 3.5) * lay.gx * e, cy = sy + (i - 3.5) * lay.gy * e;
+      n.style.transform = 'translate3d(' + r2(cx - CXR * W) + 'px,' + r2(cy - CYR * W) + 'px,0) scale(' + (Math.round(k * 10000) / 10000) + ')';
+      n.style.opacity = r2(fade);
+    });
+    // фото hero едет вместе со стопкой (ось стрелок остаётся на оси циферблата)
+    var hd = lay.hero.d, kd = (W * CASE_W / HUB01.caseW) / hd;
+    var hubX = sx + (HUBX - CXR) * W, hubY = sy + (HUBY - CYR) * W;
+    var nl = hubX - HUB01.x * hd * kd, nt = hubY - HUB01.y * hd * kd;
+    heroPhoto.style.transform = 'translate3d(' + r2(nl - lay.hero.left) + 'px,' + r2(nt - lay.hero.top) + 'px,0) scale(' + (Math.round(kd * 10000) / 10000) + ')';
+    heroPhoto.style.opacity = r2(1 - fade);
+    heroPhoto.style.visibility = fade >= 1 ? 'hidden' : 'visible';
+    // текущие габариты стопки — для лупы
+    lay.box = { x0: sx - 3.5 * lay.gx * e - 0.48 * W, x1: sx + 3.5 * lay.gx * e + 0.5 * W, y0: sy - 3.5 * lay.gy * e - 0.3 * W, y1: sy + 3.5 * lay.gy * e + 0.4 * W };
+    if (fade < 0.5) lay.box = { x0: lay.hero.left + nl - lay.hero.left + 0.1 * hd * kd, x1: nl + 0.9 * hd * kd, y0: nt + 0.15 * hd * kd, y1: nt + 0.62 * hd * kd };
+    if (lay.axis) lay.axis.style.opacity = r2(seg(p, 0.42, 0.66) * 0.55);
+    var n = lay.items.length;
+    lay.items.forEach(function (it, i) {
+      var st = (i / n) * 0.5;
+      var ci = seg(c, st, st + 0.45);
+      it.g.setAttribute('opacity', ci > 0 ? 1 : 0);
+      it.line.style.strokeDashoffset = r2(it.len * (1 - seg(ci, 0, 0.6)));
+      it.shelf.style.strokeDashoffset = r2(it.shelfLen * (1 - seg(ci, 0.5, 1)));
+      var to = r2(seg(ci, 0.55, 1));
+      it.texts.forEach(function (tx) { tx.style.opacity = to; });
+    });
+    var hp = seg(p, 0, 0.14);
+    heroEl.style.opacity = r2(1 - hp);
+    heroEl.style.transform = 'translateY(' + r2(-40 * hp) + 'px)';
+    heroEl.style.visibility = hp >= 1 ? 'hidden' : 'visible';
+    var rp = seg(p, 0.3, 0.44);
+    razborHead.style.opacity = r2(rp);
+    razborHead.style.visibility = rp > 0 ? 'visible' : 'hidden';
+    if (hint) hint.style.opacity = r2(1 - seg(p, 0, 0.06));
+    if (photoLoupeSync) photoLoupeSync();
+  }
+
+  function applyPhotoLayout() {
+    PL = computePhotoLayout();
+    var wpx = Math.round(PL.Wd) + 'px';
+    PH_ORDER.forEach(function (id) { phEls[id].style.width = wpx; });
+    buildPhotoCallouts(PL);
+    renderPhoto(state.p);
+  }
+
+  /* лупа над фото: клон сцены в круглом окне, ×2,5 */
+  var photoLoupeSync = null;
+  function initPhotoLoupe() {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches || !ph) return;
+    var Z = 2.5, R = 105, clone = null, cloneNodes = [], origNodes = [], last = null, raf = 0;
+    function ensure() {
+      if (clone) return;
+      clone = phWorld.cloneNode(true);
+      clone.removeAttribute('id');
+      $$('[id]', clone).forEach(function (n) { if (n.tagName.toLowerCase() !== 'lineargradient') n.removeAttribute('id'); });
+      $$('img', clone).forEach(function (img) { img.loading = 'eager'; img.setAttribute('sizes', '100vw'); });
+      $$('source', clone).forEach(function (sr) { sr.setAttribute('sizes', '100vw'); });
+      $$('.hand-h', clone).forEach(function (n) { handH.push(n); });
+      $$('.hand-m', clone).forEach(function (n) { handM.push(n); });
+      $$('.hand-s', clone).forEach(function (n) { handS.push(n); });
+      origNodes = [heroPhoto].concat(PH_ORDER.map(function (id) { return phEls[id]; }));
+      cloneNodes = [$('.hero-photo', clone)].concat(PH_ORDER.map(function (id) { return $('[data-id="' + id + '"]', clone); }));
+      phLoupe.appendChild(clone);
+    }
+    function sync() {
+      if (!clone || phLoupe.hidden) return;
+      clone.style.width = scene.clientWidth + 'px';
+      clone.style.height = scene.clientHeight + 'px';
+      origNodes.forEach(function (o, i) {
+        var cn = cloneNodes[i];
+        cn.style.transform = o.style.transform; cn.style.opacity = o.style.opacity;
+        cn.style.width = o.style.width; cn.style.visibility = o.style.visibility;
+      });
+    }
+    photoLoupeSync = sync;
+    function place() {
+      raf = 0;
+      if (!last) return;
+      sync();
+      phLoupe.style.transform = 'translate3d(' + r2(last.x - R) + 'px,' + r2(last.y - R) + 'px,0)';
+      clone.style.transform = 'translate3d(' + r2(R - last.x * Z) + 'px,' + r2(R - last.y * Z) + 'px,0) scale(' + Z + ')';
+      sync();
+    }
+    function hide() { phLoupe.hidden = true; ph.classList.remove('loupe-on'); last = null; }
+    ph.addEventListener('pointermove', function (e) {
+      if (e.pointerType !== 'mouse' || !photoMode || !PL || !PL.box) return;
+      var r = ph.getBoundingClientRect();
+      var x = e.clientX - r.left, y = e.clientY - r.top, b = PL.box;
+      if (x < b.x0 || x > b.x1 || y < b.y0 || y > b.y1) { hide(); return; }
+      ensure();
+      phLoupe.hidden = false;
+      ph.classList.add('loupe-on');
+      last = { x: x, y: y };
+      if (!raf) raf = requestAnimationFrame(place);
+    });
+    ph.addEventListener('pointerleave', hide);
+    window.addEventListener('scroll', function () { if (last) hide(); }, { passive: true });
   }
 
   // пауза анимаций колёс, когда сцена вне экрана
@@ -429,7 +688,7 @@
         sceneVisible = en.isIntersecting;
         svg.classList.toggle('is-paused', !en.isIntersecting);
       });
-    }).observe(stage);
+    }).observe(scene);
   }
 
   /* ---------- 4. Лупа ---------- */
@@ -626,7 +885,7 @@
       scene.classList.add('is-static');
       try { applyLayout(); } catch (e2) { /* без сцены страница всё равно читается */ }
     }
-    initLoupe();
+    if (photoMode && !isStatic) initPhotoLoupe(); else initLoupe();
   }
   if (doc.fonts && doc.fonts.ready) {
     var started = false;

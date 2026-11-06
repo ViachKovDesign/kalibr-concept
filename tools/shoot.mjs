@@ -80,6 +80,9 @@ if (!only || only.includes('states')) {
   await p.mouse.click(box.x + box.width * 0.35, box.y + box.height * 0.5);
   await p.waitForTimeout(300);
   await p.locator('.case').nth(0).screenshot({ path: `${out}/state-before-after-mid.png` });
+  const ba2 = p.locator('.ba').nth(1); await ba2.scrollIntoViewIfNeeded();
+  const b2 = await ba2.boundingBox(); await p.mouse.click(b2.x + b2.width * 0.6, b2.y + b2.height * 0.5); await p.waitForTimeout(300);
+  await p.locator('.case').nth(1).screenshot({ path: `${out}/state-before-after-case.png` });
   // форма: пустая отправка
   await p.locator('#zapis').scrollIntoViewIfNeeded();
   await p.locator('.btn-submit').click();
@@ -105,9 +108,10 @@ if (!only || only.includes('states')) {
   // лупа
   await p.addStyleTag({ content: '.site-header{opacity:1!important}' });
   await p.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' })); await p.waitForTimeout(500);
-  const wb = await p.locator('#p-dial').boundingBox();
-  await p.mouse.move(wb.x + wb.width * 0.5, wb.y + wb.height * 0.4);
-  await p.mouse.move(wb.x + wb.width * 0.55, wb.y + wb.height * 0.45);
+  const wb = (await p.locator('.hero-photo').boundingBox()) || (await p.locator('#p-dial').boundingBox());
+  await p.mouse.move(wb.x + wb.width * 0.45, wb.y + wb.height * 0.3);
+  await p.mouse.move(wb.x + wb.width * 0.47, wb.y + wb.height * 0.33);
+  await p.waitForTimeout(1200);
   await p.waitForTimeout(300);
   await p.screenshot({ path: `${out}/state-loupe.png` });
   // мобильное меню

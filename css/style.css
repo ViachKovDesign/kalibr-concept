@@ -229,8 +229,9 @@ html:not(.js) .site-header { position: relative; height: auto; padding: 8px 0; }
 @media (prefers-reduced-motion: no-preference) {
   .js .scene:not(.is-static) { height: 100vh; height: 100svh; min-height: 540px; overflow: hidden; }
   .js .scene:not(.is-static) .hero { position: absolute; left: 0; right: 0; top: 0; bottom: 0; max-width: none; margin: 0; padding: calc(var(--header-h) + 12px) var(--pad) 32px var(--edge); display: flex; flex-direction: column; justify-content: center; pointer-events: none; }
-  .js .scene:not(.is-static) .hero > * { pointer-events: auto; max-width: min(620px, 48vw); }
-  .js .scene:not(.is-static) .hero h1, .js .scene:not(.is-static) .hero .lead { max-width: min(640px, 46vw); }
+  .js .scene:not(.is-static) .hero-copy { pointer-events: auto; }
+  .js .scene:not(.is-static) .hero-copy > * { max-width: min(600px, 45vw); }
+  .js .scene:not(.is-static) .hero h1, .js .scene:not(.is-static) .hero .lead { max-width: min(600px, 45vw); }
   .js .scene:not(.is-static) .razbor-head { position: absolute; top: calc(var(--header-h) + 16px); left: 0; padding: 0 var(--pad) 0 var(--edge); max-width: 420px; opacity: 0; visibility: hidden; animation: failsafe 0s 5s forwards; }
   .js .scene:not(.is-static) .razbor-note { display: none; }
   .js .scene:not(.is-static) .razbor-head { right: 0; max-width: none; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 28px; }
@@ -240,6 +241,15 @@ html:not(.js) .site-header { position: relative; height: auto; padding: 8px 0; }
   /* до запуска скрипта часы стоят примерно там же, где их поставит раскладка hero — без вспышек */
   .js .scene:not(.is-static):not(.is-live) .stage { top: var(--header-h); left: 44%; }
   .js .scene.is-live .razbor-head { animation: none; }
+  /* фото-режим (по умолчанию): SVG-сцена спрятана, фото-слои показаны */
+  .js .scene:not(.is-static):not(.mode-svg) .stage { display: none; }
+  .js .scene:not(.is-static):not(.mode-svg) .ph { display: block; }
+  .js .scene.mode-svg .hero-photo { display: none; }
+  .js .scene:not(.is-static) .hero-photo {
+    --d: min(100%, 56vw);
+    position: absolute; z-index: 1; right: -1vw; top: calc(50% + 34px - .345 * min(100svh, 50vw));
+    width: min(100svh, 50vw); height: auto; margin: 0; pointer-events: none; transform-origin: 0 0;
+  }
   .js .scene:not(.is-static) .stage-hint {
     display: flex; align-items: center; gap: 12px;
     position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
@@ -249,10 +259,11 @@ html:not(.js) .site-header { position: relative; height: auto; padding: 8px 0; }
 
   @media (max-aspect-ratio: 11/10), (max-width: 860px) {
     .js .scene:not(.is-static) .hero { justify-content: flex-start; padding-top: calc(var(--header-h) + 20px); background: linear-gradient(180deg, rgba(18, 17, 16, .92) 0%, rgba(18, 17, 16, .86) 50%, rgba(18, 17, 16, 0) 64%); }
-    .js .scene:not(.is-static) .hero > *, .js .scene:not(.is-static) .hero h1, .js .scene:not(.is-static) .hero .lead { max-width: 640px; }
+    .js .scene:not(.is-static) .hero-copy > *, .js .scene:not(.is-static) .hero h1, .js .scene:not(.is-static) .hero .lead { max-width: 640px; }
     .js .scene:not(.is-static) .razbor-head { right: 0; max-width: none; }
     .js .scene:not(.is-static) .stage-hint { display: none; }
     .js .scene:not(.is-static):not(.is-live) .stage { top: 52%; left: 0; }
+    .js .scene:not(.is-static) .hero-photo { width: min(105vw, 640px); right: auto; left: calc(50% - .4814 * min(105vw, 640px)); top: auto; bottom: calc(-.42 * min(105vw, 640px)); }
   }
 }
 @keyframes failsafe { to { opacity: 1; visibility: visible; } }
@@ -281,6 +292,50 @@ html:not(.js) .site-header { position: relative; height: auto; padding: 8px 0; }
   .js .scene:not(.is-static) .hero .lead { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 }
 .scene.is-static .hero-specs { display: flex; }
+
+/* hero-фото в обычном потоке (без JS или при reduced-motion) */
+.hero-photo { display: block; margin: 24px auto 0; max-width: 560px; }
+.hero-photo img { display: block; width: 100%; height: auto; }
+@media (min-width: 900px) {
+  .hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: center; column-gap: 32px; }
+  .hero-photo { margin: 0; max-width: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .js .scene:not(.is-static) .hero { display: flex; align-items: flex-start; }
+}
+
+/* фото-разборка */
+.ph { display: none; position: absolute; inset: 0; z-index: 1; overflow: hidden; }
+.ph-world, .ph-stack { position: absolute; inset: 0; }
+.ph-world .hero-photo { z-index: 0; }
+.ph-layer { position: absolute; left: 0; top: 0; width: 300px; height: auto; display: block; transform-origin: 0 0; opacity: 0; pointer-events: none; }
+.ph-layer img { display: block; width: 100%; height: auto; }
+.ph-callouts { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 3; }
+.ph-callouts.is-port .co-name { font-size: 16px; }
+.ph-callouts.is-port .co-num { font-size: 12px; }
+.ph-callouts.is-port .co-spec { font-size: 11px; }
+.ph-loupe {
+  position: absolute; left: 0; top: 0; z-index: 4; width: 210px; height: 210px; border-radius: 50%; overflow: hidden;
+  background: var(--bg); border: 3px solid var(--brass); pointer-events: none;
+  box-shadow: 0 0 0 6px rgba(18, 17, 16, .55), 0 0 0 7px var(--paper), 0 18px 40px rgba(0, 0, 0, .55);
+}
+.ph-loupe .ph-world { transform-origin: 0 0; inset: auto; left: 0; top: 0; }
+.ph.loupe-on { cursor: none; }
+
+/* рисунки с подписями (фото 10–12) */
+.fig { margin: 0; }
+.fig-img, .fig-img img { display: block; width: 100%; height: auto; }
+.fig-img img { border: 1px solid var(--line-2); background: var(--bg-2); }
+.fig figcaption { margin-top: 12px; font: 400 13px/1.5 var(--mono); color: var(--ink-3); }
+.fig figcaption span { color: var(--brass); margin-right: 10px; }
+.fig-wide { margin-bottom: clamp(40px, 6vw, 72px); }
+.fig-wide .fig-img img { aspect-ratio: 21 / 9; object-fit: cover; object-position: 50% 45%; }
+.master-photos { display: grid; gap: 24px; }
+@media (min-width: 1024px) {
+  .master-photos { grid-column: 1 / -1; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); align-items: end; }
+}
+.ba-photo .ba-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ba-photo { aspect-ratio: 2046 / 1364; }
 
 /* лупа */
 .stage.loupe-on .watch-svg { cursor: none; }
