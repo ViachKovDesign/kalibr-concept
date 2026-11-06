@@ -387,45 +387,48 @@
 
   var trigger = null;
   var photoMode = !!$('#ph');
-  function initScene() {
+  function initScene(done) {
     if (isStatic) {
       scene.classList.add('is-static');
       applyLayout();
+      done();
       return;
     }
     gsap.registerPlugin(ScrollTrigger);
     ScrollTrigger.config({ ignoreMobileResize: true });
     scene.classList.add('is-live');
-    if (photoMode) {
-      scene.classList.add('mode-photo');
-      setupPhoto();
-      applyPhotoLayout();
-    } else {
-      scene.classList.add('mode-svg');
-      applyLayout();
-    }
-    var tween = gsap.to(state, {
-      p: 1, ease: 'none',
-      onUpdate: function () { if (photoMode) renderPhoto(state.p); else render(state.p); },
-      scrollTrigger: {
-        trigger: scene, start: 'top top',
-        end: function () { return '+=' + Math.round(window.innerHeight * (mode === 'land' ? 2.6 : 2.2)); },
-        pin: true, scrub: 0.7, anticipatePin: 1, invalidateOnRefresh: true
-      }
-    });
-    trigger = tween.scrollTrigger;
-    var lastW = window.innerWidth, lastH = window.innerHeight, to;
-    window.addEventListener('resize', function () {
-      clearTimeout(to);
-      to = setTimeout(function () {
-        // на телефоне меняется только высота из-за адресной строки — пересчитываем, только если изменилась ширина или высота заметно
-        if (window.innerWidth === lastW && Math.abs(window.innerHeight - lastH) < 120) return;
-        lastW = window.innerWidth; lastH = window.innerHeight;
-        if (photoMode) applyPhotoLayout(); else applyLayout();
-        ScrollTrigger.refresh();
-      }, 150);
-    });
+    scene.classList.add(photoMode ? 'mode-photo' : 'mode-svg');
+    if (photoMode) setupPhoto();
+    // работа разбита на короткие задачи, чтобы не блокировать главный поток (TBT)
+    setTimeout(function () {
+      if (photoMode) applyPhotoLayout(); else applyLayout();
+      setTimeout(function () {
+        var tween = gsap.to(state, {
+          p: 1, ease: 'none',
+          onUpdate: function () { if (photoMode) renderPhoto(state.p); else render(state.p); },
+          scrollTrigger: {
+            trigger: scene, start: 'top top',
+            end: function () { return '+=' + Math.round(window.innerHeight * (mode === 'land' ? 2.6 : 2.2)); },
+            pin: true, scrub: 0.7, anticipatePin: 1, invalidateOnRefresh: true
+          }
+        });
+        trigger = tween.scrollTrigger;
+        var lastW = window.innerWidth, lastH = window.innerHeight, to;
+        window.addEventListener('resize', function () {
+          clearTimeout(to);
+          to = setTimeout(function () {
+            // на телефоне меняется только высота из-за адресной строки — пересчитываем, только если изменилась ширина или высота заметно
+            if (window.innerWidth === lastW && Math.abs(window.innerHeight - lastH) < 120) return;
+            lastW = window.innerWidth; lastH = window.innerHeight;
+            if (photoMode) applyPhotoLayout(); else applyLayout();
+            ScrollTrigger.refresh();
+          }, 150);
+        });
+        done();
+      }, 0);
+    }, 0);
   }
+
 
 
   /* ---------- 3б. Фото-разборка ---------- */
@@ -461,9 +464,9 @@
     if (heroImg && heroImg.complete && heroImg.naturalWidth === 0) photoMode = false;
   }
 
+  var heroCopy = $('.hero-copy');
   function setupPhoto() {
-    // фото hero переезжает в «мир» сцены: дальше его двигает прокрутка
-    if (heroPhoto && heroPhoto.parentNode !== phWorld) phWorld.insertBefore(heroPhoto, phStack);
+    // фото hero остаётся на своём месте в DOM (перестановка узла сбивает LCP) — двигаем его только transform
   }
 
   function computePhotoLayout() {
@@ -475,7 +478,9 @@
     var lay = { w: w, h: h, mode: mode };
     heroPhoto.style.transform = '';
     var hr = heroPhoto.getBoundingClientRect(), sr = scene.getBoundingClientRect();
-    lay.hero = { left: hr.left - sr.left, top: hr.top - sr.top, d: hr.width };
+    lay.css = { left: hr.left - sr.left, top: hr.top - sr.top, d: hr.width };
+    lay.hero = { left: lay.css.left, top: lay.css.top, d: lay.css.d };
+
     var top, bottom, avail, Wd, gx, gy, X0, Y0;
     if (!portrait) {
       top = hU + headH + 48; bottom = h - 34; avail = bottom - top;
@@ -486,13 +491,16 @@
       Y0 = top + 0.21 * Wd + 3.5 * gy + Math.max(0, (avail - 7 * gy - 0.5 * Wd) / 2);
     } else {
       var labelW = Math.min(176, w * 0.44);
-      top = hU + headH + 26; bottom = h - 14; avail = bottom - top;
+      top = hU + headH + 26; bottom = h - 24; avail = bottom - top;
       gx = 3;
-      Wd = Math.min((w - labelW - 6 - 24 - 7 * gx) / 0.97, avail / 1.6);
+      Wd = Math.min((w - labelW - 6 - 24 - 7 * gx) / 0.97, avail / 2.8);
       gy = Math.min((avail - 0.5 * Wd) / 7, 0.4 * Wd);
-      X0 = 10 + 0.46 * Wd + 3.5 * gx;
+      // стопка + колонка подписей — по центру экрана
+      var total = 0.97 * Wd + 7 * gx + 36 + labelW;
+      var left = Math.max(10, (w - total) / 2);
+      X0 = left + 0.46 * Wd + 3.5 * gx;
       Y0 = top + 0.21 * Wd + 3.5 * gy + Math.max(0, (avail - 7 * gy - 0.5 * Wd) / 2);
-      lay.colX = w - labelW - 6;
+      lay.colX = Math.min(w - labelW - 6, left + 0.97 * Wd + 7 * gx + 36);
     }
     lay.Wd = Wd; lay.gx = gx; lay.gy = gy; lay.X0 = X0; lay.Y0 = Y0;
     // стопка в состоянии hero: ось циферблата совпадает с осью стрелок на фото 01, корпус — по ширине
@@ -551,8 +559,10 @@
     } else {
       var right = items.filter(function (i) { return i.side > 0; }), left = items.filter(function (i) { return i.side < 0; });
       var maxW = Math.max.apply(null, items.map(function (i) { return i.w; }));
-      var colR = Math.min(Math.max.apply(null, right.map(function (i) { return i.ax; })) + 48, lay.w - maxW - 20);
-      var colL = Math.max(Math.min.apply(null, left.map(function (i) { return i.ax; })) - 48, maxW + 20);
+      // колонки подписей не должны залезать на соседние детали: циферблат (3) слева и механизм (4) справа
+      var x3 = lay.X0 - 0.5 * lay.gx, x4 = lay.X0 + 0.5 * lay.gx;
+      var colR = Math.min(Math.max(Math.max.apply(null, right.map(function (i) { return i.ax; })) + 48, x4 + 0.3 * lay.Wd + 28), lay.w - maxW - 20);
+      var colL = Math.max(Math.min(Math.min.apply(null, left.map(function (i) { return i.ax; })) - 48, x3 - 0.34 * lay.Wd - 28), maxW + 20);
       place(right); place(left);
       right.forEach(function (i) { i.lx = colR; });
       left.forEach(function (i) { i.lx = colL - i.w; i.endX = colL; });
@@ -588,15 +598,15 @@
       n.style.opacity = r2(fade);
     });
     // фото hero едет вместе со стопкой (ось стрелок остаётся на оси циферблата)
-    var hd = lay.hero.d, kd = (W * CASE_W / HUB01.caseW) / hd;
+    var Dcur = W * CASE_W / HUB01.caseW, kd = Dcur / lay.css.d;
     var hubX = sx + (HUBX - CXR) * W, hubY = sy + (HUBY - CYR) * W;
-    var nl = hubX - HUB01.x * hd * kd, nt = hubY - HUB01.y * hd * kd;
-    heroPhoto.style.transform = 'translate3d(' + r2(nl - lay.hero.left) + 'px,' + r2(nt - lay.hero.top) + 'px,0) scale(' + (Math.round(kd * 10000) / 10000) + ')';
+    var nl = hubX - HUB01.x * Dcur, nt = hubY - HUB01.y * Dcur;
+    heroPhoto.style.transform = 'translate3d(' + r2(nl - lay.css.left) + 'px,' + r2(nt - lay.css.top) + 'px,0) scale(' + (Math.round(kd * 10000) / 10000) + ')';
     heroPhoto.style.opacity = r2(1 - fade);
     heroPhoto.style.visibility = fade >= 1 ? 'hidden' : 'visible';
     // текущие габариты стопки — для лупы
     lay.box = { x0: sx - 3.5 * lay.gx * e - 0.48 * W, x1: sx + 3.5 * lay.gx * e + 0.5 * W, y0: sy - 3.5 * lay.gy * e - 0.3 * W, y1: sy + 3.5 * lay.gy * e + 0.4 * W };
-    if (fade < 0.5) lay.box = { x0: lay.hero.left + nl - lay.hero.left + 0.1 * hd * kd, x1: nl + 0.9 * hd * kd, y0: nt + 0.15 * hd * kd, y1: nt + 0.62 * hd * kd };
+    if (fade < 0.5) lay.box = { x0: nl + 0.1 * Dcur, x1: nl + 0.9 * Dcur, y0: nt + 0.15 * Dcur, y1: nt + 0.62 * Dcur };
     if (lay.axis) lay.axis.style.opacity = r2(seg(p, 0.42, 0.66) * 0.55);
     var n = lay.items.length;
     lay.items.forEach(function (it, i) {
@@ -609,9 +619,9 @@
       it.texts.forEach(function (tx) { tx.style.opacity = to; });
     });
     var hp = seg(p, 0, 0.14);
-    heroEl.style.opacity = r2(1 - hp);
-    heroEl.style.transform = 'translateY(' + r2(-40 * hp) + 'px)';
-    heroEl.style.visibility = hp >= 1 ? 'hidden' : 'visible';
+    heroCopy.style.opacity = r2(1 - hp);
+    heroCopy.style.transform = 'translateY(' + r2(-40 * hp) + 'px)';
+    heroCopy.style.visibility = hp >= 1 ? 'hidden' : 'visible';
     var rp = seg(p, 0.3, 0.44);
     razborHead.style.opacity = r2(rp);
     razborHead.style.visibility = rp > 0 ? 'visible' : 'hidden';
@@ -636,6 +646,7 @@
       if (clone) return;
       clone = phWorld.cloneNode(true);
       clone.removeAttribute('id');
+      clone.insertBefore(heroPhoto.cloneNode(true), clone.firstChild);
       $$('[id]', clone).forEach(function (n) { if (n.tagName.toLowerCase() !== 'lineargradient') n.removeAttribute('id'); });
       $$('img', clone).forEach(function (img) { img.loading = 'eager'; img.setAttribute('sizes', '100vw'); });
       $$('source', clone).forEach(function (sr) { sr.setAttribute('sizes', '100vw'); });
@@ -877,15 +888,16 @@
 
   /* ---------- запуск ---------- */
   function start() {
+    var loupe = function () { if (photoMode && !isStatic) initPhotoLoupe(); else initLoupe(); };
     try {
-      initScene();
+      initScene(loupe);
     } catch (err) {
       // запасной путь: статичная схема
       isStatic = true;
       scene.classList.add('is-static');
       try { applyLayout(); } catch (e2) { /* без сцены страница всё равно читается */ }
+      loupe();
     }
-    if (photoMode && !isStatic) initPhotoLoupe(); else initLoupe();
   }
   if (doc.fonts && doc.fonts.ready) {
     var started = false;

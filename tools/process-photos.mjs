@@ -31,13 +31,14 @@ const LAYERS = [
   { id: '09', file: '09-exhibition-caseback', cx: 1024, cy: 1040, w: 1534, mm: 37 },
 ];
 
-async function exportAll(img, name, widths, { alpha = true } = {}) {
+async function exportAll(img, name, widths, opts = {}) {
+  const alpha = opts.alpha !== false;
   const meta = await img.metadata();
   const out = [];
   for (const w of widths) {
     const width = Math.min(w, meta.width);
     const base = img.clone().resize({ width, withoutEnlargement: true });
-    await base.clone().avif({ quality: alpha ? 52 : 50, effort: 5 }).toFile(join(OUT, `${name}-${w}.avif`));
+    await base.clone().avif({ quality: opts.heroQ || (alpha ? 52 : 50), effort: 5 }).toFile(join(OUT, `${name}-${w}.avif`));
     await base.clone().webp({ quality: 76, alphaQuality: 80, effort: 5 }).toFile(join(OUT, `${name}-${w}.webp`));
     out.push(width);
   }
@@ -72,7 +73,7 @@ for (const L of LAYERS) {
 }
 
 // 2. hero (с альфой — лежит на сетке фона)
-await exportAll(sharp(join(RAW, '01-assembled-watch.png')), 'hero-01', SIZES);
+await exportAll(sharp(join(RAW, '01-assembled-watch.png')), 'hero-01', SIZES, { heroQ: 44 });
 
 // 3. фото «Мастер» и «Как работаем» — непрозрачные
 for (const n of ['10-balance-hairspring-macro', '11-watchmakers-bench', '12-watchmaker-fitting-gear']) {

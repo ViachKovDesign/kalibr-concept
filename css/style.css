@@ -4,19 +4,11 @@
    ========================================================= */
 
 /* ---------- шрифты (Google Fonts, локальные копии) ---------- */
-@font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 500 700; font-display: swap; src: url(../fonts/cormorant-cyr.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
-@font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 500 700; font-display: swap; src: url(../fonts/cormorant-lat.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 500; font-display: swap; src: url(../fonts/cormorant-italic-cyr.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
-@font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 500; font-display: swap; src: url(../fonts/cormorant-italic-lat.woff2) format('woff2'); unicode-range: U+0000-00FF, U+2000-206F, U+2212; }
-@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 400 600; font-display: swap; src: url(../fonts/plexsans-cyr.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
-@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 400 600; font-display: swap; src: url(../fonts/plexsans-lat.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 400 600; font-display: swap; src: url(../fonts/plexsans-ext.woff2) format('woff2'); unicode-range: U+20BD; }
-@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(../fonts/plexmono-400-cyr.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
-@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(../fonts/plexmono-400-lat.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(../fonts/plexmono-400-ext.woff2) format('woff2'); unicode-range: U+20BD; }
-@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(../fonts/plexmono-500-cyr.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
-@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(../fonts/plexmono-500-lat.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(../fonts/plexmono-500-ext.woff2) format('woff2'); unicode-range: U+20BD; }
+@font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 500 700; font-display: swap; src: url(../fonts/cormorant.woff2) format('woff2'); }
+@font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 500; font-display: swap; src: url(../fonts/cormorant-italic.woff2) format('woff2'); }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 400 600; font-display: swap; src: url(../fonts/plexsans.woff2) format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(../fonts/plexmono-400.woff2) format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(../fonts/plexmono-500.woff2) format('woff2'); }
 
 /* ---------- токены ---------- */
 :root {
@@ -258,12 +250,14 @@ html:not(.js) .site-header { position: relative; height: auto; padding: 8px 0; }
   .hint-line { width: 1px; height: 28px; background: linear-gradient(var(--brass), transparent); animation: hint 2.2s var(--ease) infinite; transform-origin: top; }
 
   @media (max-aspect-ratio: 11/10), (max-width: 860px) {
-    .js .scene:not(.is-static) .hero { justify-content: flex-start; padding-top: calc(var(--header-h) + 20px); background: linear-gradient(180deg, rgba(18, 17, 16, .92) 0%, rgba(18, 17, 16, .86) 50%, rgba(18, 17, 16, 0) 64%); }
+    .js .scene:not(.is-static) .hero { justify-content: flex-start; padding-top: calc(var(--header-h) + 20px); }
     .js .scene:not(.is-static) .hero-copy > *, .js .scene:not(.is-static) .hero h1, .js .scene:not(.is-static) .hero .lead { max-width: 640px; }
     .js .scene:not(.is-static) .razbor-head { right: 0; max-width: none; }
     .js .scene:not(.is-static) .stage-hint { display: none; }
     .js .scene:not(.is-static):not(.is-live) .stage { top: 52%; left: 0; }
-    .js .scene:not(.is-static) .hero-photo { width: min(105vw, 640px); right: auto; left: calc(50% - .4814 * min(105vw, 640px)); top: auto; bottom: calc(-.42 * min(105vw, 640px)); }
+    /* телефон/планшет: фото в потоке сразу под текстом — без сдвигов скриптом */
+    .js .scene:not(.is-static) .hero-copy { position: relative; z-index: 2; }
+    .js .scene:not(.is-static) .hero-photo { --pd: min(105vw, 640px); position: relative; flex: none; right: auto; left: auto; top: auto; bottom: auto; width: var(--pd); max-width: none; margin: calc(22px - .1465 * var(--pd)) 0 0 calc(50% - .4814 * var(--pd)); -webkit-mask-image: linear-gradient(180deg, transparent 6%, #000 15%); mask-image: linear-gradient(180deg, transparent 6%, #000 15%); }
   }
 }
 @keyframes failsafe { to { opacity: 1; visibility: visible; } }
@@ -308,6 +302,7 @@ html:not(.js) .site-header { position: relative; height: auto; padding: 8px 0; }
 .ph { display: none; position: absolute; inset: 0; z-index: 1; overflow: hidden; }
 .ph-world, .ph-stack { position: absolute; inset: 0; }
 .ph-world .hero-photo { z-index: 0; }
+.ph-loupe .hero-photo { position: absolute; }
 .ph-layer { position: absolute; left: 0; top: 0; width: 300px; height: auto; display: block; transform-origin: 0 0; opacity: 0; pointer-events: none; }
 .ph-layer img { display: block; width: 100%; height: auto; }
 .ph-callouts { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 3; }
@@ -511,8 +506,9 @@ html:not(.js) .site-header { position: relative; height: auto; padding: 8px 0; }
 @media (min-width: 1024px) {
   .master-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 80px; row-gap: 32px; }
   .master .section-head { grid-column: 1 / -1; }
-  .master-text { grid-column: 1; }
-  .tools { grid-column: 2; grid-row: 2; }
+  .master-photos { grid-row: 2; }
+  .master-text { grid-column: 1; grid-row: 3; }
+  .tools { grid-column: 2; grid-row: 3; }
 }
 @media (min-width: 1024px) {
   .master .section-head { grid-template-columns: 220px minmax(0, 1fr); }
