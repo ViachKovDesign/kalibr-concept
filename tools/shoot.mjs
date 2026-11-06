@@ -68,6 +68,7 @@ if (!only || only.includes('rm')) {
 if (!only || only.includes('states')) {
   const { p, ctx } = await page({ vp: { width: 1280, height: 800 }, name: 'states' });
   await scrollThrough(p);
+  await p.addStyleTag({ content: '.site-header{opacity:0!important}' });
   await p.locator('#faq').scrollIntoViewIfNeeded();
   await p.locator('.qa summary').nth(0).click();
   await p.locator('.qa summary').nth(4).click();
@@ -102,6 +103,7 @@ if (!only || only.includes('states')) {
   await p.locator('#zapis').screenshot({ path: `${out}/state-form-sent.png` });
   console.log('form ok:', ok, 'phone:', phone);
   // лупа
+  await p.addStyleTag({ content: '.site-header{opacity:1!important}' });
   await p.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' })); await p.waitForTimeout(500);
   const wb = await p.locator('#p-dial').boundingBox();
   await p.mouse.move(wb.x + wb.width * 0.5, wb.y + wb.height * 0.4);

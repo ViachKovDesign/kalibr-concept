@@ -145,8 +145,9 @@
         copyBottom = maxB ? (maxB - sb.top) / sc : H * 0.5;
       }
       var room = H - copyBottom;
-      var hs = clamp(Math.min(W * 0.84 / (2 * R), room * 0.9 / (2 * R)), 0.45, 1.6);
-      lay.hero = { x: W / 2, y: copyBottom + Math.max(room / 2, R * hs + 10) + 6, s: hs };
+      // ушки (194) не должны залезать на текст; корпус может уходить за нижний край не больше чем на четверть
+      var hs = clamp(Math.min(W * 0.84 / (2 * R), (room - 12) / (194 + R * 0.8)), 0.42, 1.5);
+      lay.hero = { x: W / 2, y: copyBottom + 12 + 194 * hs, s: hs };
     } else {
       var hs2 = Math.min((H - hU) * 0.8 / (2 * R), W * 0.36 / (2 * R));
       lay.hero = { x: Math.min(W * 0.72, W - 200 * hs2 - 30), y: hU + (H - hU) / 2, s: hs2 };
@@ -269,7 +270,7 @@
       });
     } else {
       var list = items.slice().sort(function (a, b) { return a.ay - b.ay; });
-      var minGap = 44;
+      var minGap = 54;
       var yy = lay.top + 4;
       list.forEach(function (i) { i.ly = Math.max(i.ay + 4, yy); yy = i.ly + minGap; });
       var overB = list[list.length - 1].ly + 22 - lay.H + 6;
