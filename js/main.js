@@ -103,7 +103,7 @@
     land: {
       crystal: [0, -121, 't'], bezel: [0, 146, 'b'], hands: [0, -40, 't'], dial: [0, 118, 'b'],
       movement: [0, -112, 't'], balance: [-34, 88, 'b'], 'case': [0, -150, 't'], back: [0, 146, 'b'],
-      crown: [179, -22, 't'], strap: [0, 200, 'b']
+      crown: [179, -22, 't'], strap: [0, 175, 'b']
     },
     port: {
       crystal: [121, 0], bezel: [146, 0], hands: [40, 0], dial: [118, 0], movement: [112, 0],
@@ -127,7 +127,7 @@
     var w = stage.clientWidth, h = stage.clientHeight;
     var portrait = w / h < 1.1 || w < 860;
     mode = portrait ? 'port' : 'land';
-    var sc = portrait ? clamp(w / 420, 0.84, 1.15) : clamp(w / 1500, 0.8, 1.3); // px на единицу
+    var sc = portrait ? clamp(w / 420, 0.84, 1.15) : clamp(w / 1380, 0.85, 1.3); // px на единицу
     var W = w / sc, H = h / sc;
     var hU = (isStatic ? 0 : 68) / sc; // высота шапки в единицах
     var lay = { W: W, H: H, sc: sc, mode: mode, off: {}, anchors: {} };
@@ -383,6 +383,7 @@
     }
     gsap.registerPlugin(ScrollTrigger);
     ScrollTrigger.config({ ignoreMobileResize: true });
+    scene.classList.add('is-live');
     applyLayout();
     var tween = gsap.to(state, {
       p: 1, ease: 'none',
@@ -394,7 +395,6 @@
       }
     });
     trigger = tween.scrollTrigger;
-    scene.classList.add('is-live');
     var lastW = window.innerWidth, lastH = window.innerHeight, to;
     window.addEventListener('resize', function () {
       clearTimeout(to);

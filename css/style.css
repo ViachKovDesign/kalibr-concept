@@ -203,7 +203,7 @@ html:not(.js) .site-header { position: relative; height: auto; padding: 8px 0; }
 .co-dot { fill: var(--ink); }
 .co-num { font: 500 13px var(--mono); fill: var(--brass); letter-spacing: .06em; }
 .co-name { font: 600 20px var(--serif); fill: var(--ink); }
-.co-spec { font: 400 12px var(--mono); fill: var(--ink-3); }
+.co-spec { font: 400 12.5px var(--mono); fill: var(--ink-3); }
 .co-text { paint-order: stroke; stroke: var(--bg); stroke-width: 5px; stroke-linejoin: round; }
 .co-axis { fill: none; stroke: var(--paper); stroke-width: 1; opacity: .5; stroke-dasharray: 22 5 3 5; vector-effect: non-scaling-stroke; }
 .co-dim { fill: none; stroke: var(--brass); stroke-width: 1; vector-effect: non-scaling-stroke; }
@@ -213,11 +213,11 @@ html:not(.js) .site-header { position: relative; height: auto; padding: 8px 0; }
 .spin-xl, .spin-l, .spin-m, .spin-s, .spin-esc, .swing { transform-box: fill-box; transform-origin: center; }
 .swing { transform-origin: 50% 50%; }
 @media (prefers-reduced-motion: no-preference) {
-  .spin-xl { animation: spin 240s linear infinite reverse; }
-  .spin-l { animation: spin 90s linear infinite; }
-  .spin-m { animation: spin 30s linear infinite reverse; }
-  .spin-s { animation: spin 12s linear infinite; }
-  .spin-esc { animation: spin 6s steps(60) infinite reverse; }
+  .watch-svg .spin-xl { animation: spin 240s linear infinite reverse; }
+  .watch-svg .spin-l { animation: spin 90s linear infinite; }
+  .watch-svg .spin-m { animation: spin 30s linear infinite reverse; }
+  .watch-svg .spin-s { animation: spin 12s linear infinite; }
+  .watch-svg .spin-esc { animation: spin 6s steps(60) infinite reverse; }
   .watch-svg .swing { animation: swing .9s ease-in-out infinite alternate; }
   .is-paused .spin-xl, .is-paused .spin-l, .is-paused .spin-m, .is-paused .spin-s, .is-paused .spin-esc, .is-paused .swing { animation-play-state: paused; }
 }
@@ -236,8 +236,8 @@ html:not(.js) .site-header { position: relative; height: auto; padding: 8px 0; }
   .js .scene:not(.is-static) .razbor-head .eyebrow { margin: 0; order: 2; }
   .js .scene:not(.is-static) .razbor-title { font-size: clamp(28px, 2.8vw, 46px); margin: 0; }
   .js .scene:not(.is-static) .stage { position: absolute; inset: 0; height: auto; }
-  .js .scene:not(.is-static) .watch-svg { opacity: 0; transition: opacity .8s var(--ease); animation: failsafe-show 0s 3s forwards; }
-  .js .scene.is-live .watch-svg { opacity: 1; animation: none; }
+  /* до запуска скрипта часы стоят примерно там же, где их поставит раскладка hero — без вспышек */
+  .js .scene:not(.is-static):not(.is-live) .stage { top: var(--header-h); left: 44%; }
   .js .scene.is-live .razbor-head { animation: none; }
   .js .scene:not(.is-static) .stage-hint {
     display: flex; align-items: center; gap: 12px;
@@ -251,10 +251,10 @@ html:not(.js) .site-header { position: relative; height: auto; padding: 8px 0; }
     .js .scene:not(.is-static) .hero > *, .js .scene:not(.is-static) .hero h1, .js .scene:not(.is-static) .hero .lead { max-width: 640px; }
     .js .scene:not(.is-static) .razbor-head { right: 0; max-width: none; }
     .js .scene:not(.is-static) .stage-hint { display: none; }
+    .js .scene:not(.is-static):not(.is-live) .stage { top: 52%; left: 0; }
   }
 }
 @keyframes failsafe { to { opacity: 1; visibility: visible; } }
-@keyframes failsafe-show { to { opacity: 1; } }
 @keyframes hint { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
 
 /* компактный hero на телефоне */

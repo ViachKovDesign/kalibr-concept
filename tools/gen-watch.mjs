@@ -19,6 +19,16 @@ const C = {
 };
 
 // ---------- примитивы ----------
+// прямоугольник x,y,w,h, повёрнутый на a° вокруг (0,0) — как подпуть одного path (меньше узлов DOM)
+function rectSeg(x, y, w, h, a) {
+  const c = Math.cos(rad(a)), sn = Math.sin(rad(a));
+  const P = [[x, y], [x + w, y], [x + w, y + h], [x, y + h]].map(([px, py]) => [px * c - py * sn, px * sn + py * c]);
+  return 'M' + P.map((q) => f(q[0]) + ' ' + f(q[1])).join('L') + 'Z';
+}
+function circSeg(cx, cy, r) {
+  return `M${f(cx - r)} ${f(cy)}a${f(r)} ${f(r)} 0 1 0 ${f(2 * r)} 0a${f(r)} ${f(r)} 0 1 0 ${f(-2 * r)} 0Z`;
+}
+
 function ring(rOut, rIn) {
   return `M${f(-rOut)} 0a${f(rOut)} ${f(rOut)} 0 1 0 ${f(2 * rOut)} 0a${f(rOut)} ${f(rOut)} 0 1 0 ${f(-2 * rOut)} 0Z` +
     `M${f(-rIn)} 0a${f(rIn)} ${f(rIn)} 0 1 1 ${f(2 * rIn)} 0a${f(rIn)} ${f(rIn)} 0 1 1 ${f(-2 * rIn)} 0Z`;
@@ -61,10 +71,9 @@ function screw(x, y, r = 4, a = 30) {
 function wheel(x, y, rTip, teeth, spin, arms = 4) {
   const rRoot = rTip - Math.max(2.2, rTip * 0.07);
   const rim = rRoot - Math.max(3, rTip * 0.14);
-  let armsSvg = '';
-  for (let i = 0; i < arms; i++) {
-    armsSvg += `<rect x="-1.6" y="${f(-rim)}" width="3.2" height="${f(rim)}" rx="1" transform="rotate(${f((360 / arms) * i + 15)})" fill="url(#gBrass)"/>`;
-  }
+  let armsD = '';
+  for (let i = 0; i < arms; i++) armsD += rectSeg(-1.6, -rim, 3.2, rim, (360 / arms) * i + 15);
+  const armsSvg = `<path d="${armsD}" fill="url(#gBrass)"/>`;
   const body = `<path d="${gearPath(rRoot, rTip, teeth)}" fill="url(#gBrass)"/>` +
     `<circle r="${f(rim)}" fill="#3b3730"/>` + armsSvg +
     `<circle r="${f(Math.max(4, rTip * 0.18))}" fill="url(#gBrass)"/>` +
@@ -89,8 +98,9 @@ function strap() {
 }
 
 function caseback() {
-  let notches = '';
-  for (let i = 0; i < 6; i++) notches += `<rect x="-7" y="-146" width="14" height="9" rx="2" fill="${C.brassD}" transform="rotate(${i * 60 + 30})"/>`;
+  let nd = '';
+  for (let i = 0; i < 6; i++) nd += rectSeg(-7, -146, 14, 9, i * 60 + 30);
+  const notches = `<path d="${nd}" fill="${C.brassD}"/>`;
   return `<g class="part" id="p-back" data-part="08"><g class="tilt">
     <circle r="146" fill="url(#gCase)"/>
     <circle r="146" fill="none" stroke="${C.brassD}" stroke-width="1" class="ln"/>${notches}
@@ -104,8 +114,9 @@ function caseback() {
 }
 
 function crown() {
-  let flutes = '';
-  for (let y = -19; y <= 19; y += 4.75) flutes += `<path d="M168 ${f(y)} H190" stroke="${C.brassD}" stroke-width="1.2" opacity=".8"/>`;
+  let fd = '';
+  for (let y = -19; y <= 19; y += 4.75) fd += `M168 ${f(y)}H190`;
+  const flutes = `<path d="${fd}" stroke="${C.brassD}" stroke-width="1.2" opacity=".8"/>`;
   return `<g class="part" id="p-crown" data-part="09"><g class="tilt">
     <rect x="138" y="-3" width="34" height="6" rx="1.5" fill="#b9b5ab"/>
     <rect x="152" y="-12" width="17" height="24" rx="3" fill="url(#gBrass)"/>
@@ -155,11 +166,9 @@ function balanceBody() {
   // мост баланса + обод с винтами + спираль
   const cock = `<path d="M-34 54 L-88 10 Q-98 0 -90 -8 L-80 -12 Q-70 -14 -64 -4 L-22 40 Z" fill="url(#gPlate)" stroke="#6d695f" stroke-width="1"/>
     ${screw(-84, -2, 4, 60)}`;
-  let screws = '';
-  for (let i = 0; i < 12; i++) {
-    const [x, y] = pt(33.5, i * 30);
-    screws += `<circle cx="${f(x)}" cy="${f(y)}" r="2.1" fill="${C.brassL}" stroke="${C.brassD}" stroke-width=".5"/>`;
-  }
+  let sd = '';
+  for (let i = 0; i < 12; i++) { const [x, y] = pt(33.5, i * 30); sd += circSeg(x, y, 2.1); }
+  const screws = `<path d="${sd}" fill="${C.brassL}" stroke="${C.brassD}" stroke-width=".5"/>`;
   let spiral = 'M0 0';
   for (let t = 0; t <= 1.0001; t += 0.01) {
     const a = t * 360 * 7;
@@ -180,20 +189,22 @@ function balance() {
 }
 
 function dialBody() {
-  let ticks = '';
+  let td = '';
   for (let i = 0; i < 60; i++) {
     const five = i % 5 === 0;
-    ticks += `<rect x="${five ? -1.1 : -0.55}" y="-114" width="${five ? 2.2 : 1.1}" height="${five ? 8 : 5}" fill="${C.ink}" transform="rotate(${i * 6})"/>`;
+    td += rectSeg(five ? -1.1 : -0.55, -114, five ? 2.2 : 1.1, five ? 8 : 5, i * 6);
   }
-  let idx = '';
+  const ticks = `<path d="${td}" fill="${C.ink}"/>`;
+  let idx = '', idxD = '';
   for (let i = 0; i < 12; i++) {
     if (i === 0) {
       idx += `<rect x="-6.5" y="-100" width="4.6" height="24" rx="1" fill="url(#gBrass)" stroke="${C.brassD}" stroke-width=".6"/><rect x="1.9" y="-100" width="4.6" height="24" rx="1" fill="url(#gBrass)" stroke="${C.brassD}" stroke-width=".6"/>`;
     } else {
       const long = i % 3 === 0;
-      idx += `<rect x="-2.6" y="-100" width="5.2" height="${long ? 24 : 17}" rx="1" fill="url(#gBrass)" stroke="${C.brassD}" stroke-width=".6" transform="rotate(${i * 30})"/>`;
+      idxD += rectSeg(-2.6, -100, 5.2, long ? 24 : 17, i * 30);
     }
   }
+  idx += `<path d="${idxD}" fill="url(#gBrass)" stroke="${C.brassD}" stroke-width=".6"/>`;
   const nums = '';
   return `<circle r="118" fill="url(#gDial)"/>
     <circle r="105" fill="none" stroke="${C.ink}" stroke-width=".6" opacity=".5"/>
@@ -220,8 +231,9 @@ function hands() {
 }
 
 function bezel() {
-  let grain = '';
-  for (let i = 0; i < 120; i++) grain += `<rect x="-.4" y="-146" width=".8" height="6" fill="${C.brassD}" opacity=".55" transform="rotate(${i * 3})"/>`;
+  let gd = '';
+  for (let i = 0; i < 120; i++) gd += rectSeg(-0.4, -146, 0.8, 6, i * 3);
+  const grain = `<path d="${gd}" fill="${C.brassD}" opacity=".55"/>`;
   return `<g class="part" id="p-bezel" data-part="02"><g class="tilt">
     <path d="${ring(146, 118)}" fill="url(#gBezel)" fill-rule="evenodd"/>${grain}
     <circle r="146" fill="none" stroke="${C.brassD}" stroke-width="1" class="ln"/>
@@ -293,22 +305,22 @@ let dust = '';
 for (let i = 0; i < 70; i++) {
   const a = rnd() * 360, r = Math.sqrt(rnd()) * 108;
   const [x, y] = pt(r, a);
-  dust += `<circle cx="${f(x)}" cy="${f(y)}" r="${f(0.5 + rnd() * 1.6)}"/>`;
+  dust += circSeg(x, y, 0.5 + rnd() * 1.6);
 }
-let scratches = '';
+let scratches = '', scratches2 = '';
 for (let i = 0; i < 46; i++) {
   const a = rnd() * 360, r = 118 + rnd() * 30;
   const [x, y] = pt(r, a);
   const len = 6 + rnd() * 22, dir = rnd() * 180;
   const [dx, dy] = pt(len / 2, dir);
-  scratches += `<path d="M${f(x - dx)} ${f(y - dy)}L${f(x + dx)} ${f(y + dy)}"/>`;
+  scratches += `M${f(x - dx)} ${f(y - dy)}L${f(x + dx)} ${f(y + dy)}`;
 }
 for (let i = 0; i < 18; i++) {
   const a = rnd() * 360, r = 20 + rnd() * 90;
   const [x, y] = pt(r, a);
   const len = 8 + rnd() * 30, dir = rnd() * 180;
   const [dx, dy] = pt(len / 2, dir);
-  scratches += `<path d="M${f(x - dx)} ${f(y - dy)}L${f(x + dx)} ${f(y + dy)}" opacity=".6"/>`;
+  scratches2 += `M${f(x - dx)} ${f(y - dy)}L${f(x + dx)} ${f(y + dy)}`;
 }
 
 // ---------- график суточного хода ----------
@@ -351,8 +363,8 @@ const put = (name, content) => {
 };
 put('watch', watch);
 put('sprite', symbols);
-put('dust', dust);
-put('scratches', scratches);
+put('dust', `<path d="${dust}"/>`);
+put('scratches', `<path d="${scratches}"/><path d="${scratches2}" opacity=".6"/>`);
 put('rate', rateSvg);
 put('ratetable', rateTable);
 writeFileSync(file, html);
