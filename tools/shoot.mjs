@@ -52,7 +52,7 @@ for (const [w, h, name] of sizes) {
   // для полного скриншота снимаем закрепление: сцена остаётся в состоянии «в разборе»
   await p.evaluate(() => { const st = window.ScrollTrigger && ScrollTrigger.getAll()[0]; if (st) { st.scroll(st.end); st.kill(); } window.scrollTo({ top: 0, behavior: 'instant' }); });
   await p.waitForTimeout(400);
-  await p.screenshot({ path: `${out}/${name}-full.png`, fullPage: true });
+  await p.screenshot({ path: `${out}/${name}-full.jpg`, fullPage: true, type: 'jpeg', quality: 78 });
   await ctx.close();
 }
 // reduced motion
@@ -60,7 +60,7 @@ if (!only || only.includes('rm')) {
   for (const [w, h, name] of [[1280, 800, 'reduced-motion-1280'], [375, 812, 'reduced-motion-375']]) {
     const { p, ctx } = await page({ vp: { width: w, height: h }, name, rm: 'reduce', mobile: w < 800 });
     await overflow(p, name);
-    await p.screenshot({ path: `${out}/${name}.png`, fullPage: true });
+    await p.screenshot({ path: `${out}/${name}.jpg`, fullPage: true, type: 'jpeg', quality: 78 });
     await ctx.close();
   }
 }
