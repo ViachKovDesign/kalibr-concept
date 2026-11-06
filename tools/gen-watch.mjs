@@ -154,7 +154,7 @@ function movementBody() {
   const seat = `<circle cx="-34" cy="54" r="40" fill="#2e2b26" opacity=".55"/><circle cx="-34" cy="54" r="40" fill="none" stroke="#6d695f" stroke-width=".8" stroke-dasharray="3 3"/>`;
   const jewelsTop = jewel(-40, -36, 3) + jewel(38, -24, 2.2) + jewel(50, 18, 2.2) + jewel(-34, 54, 2.4);
   const screws = screw(-88, -52, 4.2, 20) + screw(-22, -84, 4.2, 70) + screw(70, -36, 3.8, 40) + screw(78, 2, 3.8, 110) + screw(-92, 30, 3.6, 160);
-  const engr = `<text x="-4" y="98" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" letter-spacing="1.5" fill="#55514a">К-27 · 25 КАМНЕЙ · 28 800</text>`;
+  const engr = `<text x="-4" y="88" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7" letter-spacing="1.2" fill="#55514a">К-27 · 25 КАМНЕЙ</text>`;
   return plate + seat + barrel + center + third + fourth + esc + pallet + bridges + jewelsTop + screws + engr;
 }
 
@@ -330,11 +330,11 @@ const rate = {
   before: [-38, -51, -24, -44, -62, -33],
   after: [3, 4, 1, 5, 2, 3],
 };
-const RX0 = 40, RX1 = 312, RTOP = 12, RSC = 1.4, VMAX = 10;
+const RX0 = 46, RX1 = 314, RTOP = 16, RSC = 1.4, VMAX = 10;
 const ry = (v) => RTOP + (VMAX - v) * RSC;
 const fmt = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v);
-let rateSvg = `<svg class="rate-svg" viewBox="0 0 320 152" role="img" aria-label="График суточного хода в шести положениях: до ремонта часы отставали на 24–62 секунды в сутки, после — спешат на 1–5 секунд, в пределах допуска ±5.">
-  <g font-family="IBM Plex Mono, monospace" font-size="9" fill="#a39a88">
+let rateSvg = `<svg class="rate-svg" viewBox="0 0 320 158" role="img" aria-label="График суточного хода в шести положениях: до ремонта часы отставали на 24–62 секунды в сутки, после — спешат на 1–5 секунд, в пределах допуска ±5.">
+  <g font-family="IBM Plex Mono, monospace" font-size="11" fill="#a39a88">
   <rect x="${RX0}" y="${f(ry(5))}" width="${RX1 - RX0}" height="${f(10 * RSC)}" fill="#c9a25b" opacity=".13"/>`;
 for (const v of [-20, -40, -60]) rateSvg += `<path d="M${RX0} ${f(ry(v))}H${RX1}" stroke="#34302a" stroke-width="1"/><text x="${RX0 - 6}" y="${f(ry(v) + 3)}" text-anchor="end">${fmt(v)}</text>`;
 rateSvg += `<text x="${RX0 - 6}" y="${f(ry(0) + 3)}" text-anchor="end">0</text><text x="${RX1}" y="${f(ry(5) - 3)}" text-anchor="end" fill="#c9a25b">допуск ±5</text></g>`;
@@ -346,9 +346,9 @@ rate.pos.forEach((p, i) => {
   const bx = cx - 14, ax = cx + 1;
   rateSvg += `<rect class="bar bar-before" x="${f(bx)}" y="${f(ry(0))}" width="13" height="${f(-b * RSC)}" rx="2" fill="#5d82c8"><title>${rate.full[i]}: до ремонта ${fmt(b)} с/сут</title></rect>`;
   rateSvg += `<rect class="bar bar-after" x="${f(ax)}" y="${f(ry(a))}" width="13" height="${f(a * RSC)}" rx="2" fill="#b88a2e"><title>${rate.full[i]}: после ${fmt(a)} с/сут</title></rect>`;
-  rateSvg += `<text x="${f(cx)}" y="144" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#a39a88">${p}</text>`;
-  if (b === Math.min(...rate.before)) rateSvg += `<text x="${f(bx + 6.5)}" y="${f(ry(b) + 11)}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ece3cf">${fmt(b)}</text>`;
-  if (a === Math.max(...rate.after)) rateSvg += `<text x="${f(ax + 6.5)}" y="${f(ry(a) - 4)}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="#ece3cf">${fmt(a)}</text>`;
+  rateSvg += `<text x="${f(cx)}" y="150" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#a39a88">${p}</text>`;
+  if (b === Math.min(...rate.before)) rateSvg += `<text x="${f(bx + 6.5)}" y="${f(ry(b) + 11)}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ece3cf">${fmt(b)}</text>`;
+  if (a === Math.max(...rate.after)) rateSvg += `<text x="${f(ax + 6.5)}" y="${f(ry(a) - 4)}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ece3cf">${fmt(a)}</text>`;
   rateTable += `<tr><th scope="row">${rate.full[i]}</th><td>${fmt(b)}</td><td>${fmt(a)}</td></tr>`;
 });
 rateSvg += `<path d="M${RX0} ${f(ry(0))}H${RX1}" stroke="#8d8576" stroke-width="1"/></svg>`;

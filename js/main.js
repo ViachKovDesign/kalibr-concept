@@ -103,7 +103,7 @@
     land: {
       crystal: [0, -121, 't'], bezel: [0, 146, 'b'], hands: [0, -40, 't'], dial: [0, 118, 'b'],
       movement: [0, -112, 't'], balance: [-34, 88, 'b'], 'case': [0, -150, 't'], back: [0, 146, 'b'],
-      crown: [179, -22, 't'], strap: [0, 175, 'b']
+      crown: [179, -22, 't'], strap: [-66, 168, 'b']
     },
     port: {
       crystal: [121, 0], bezel: [146, 0], hands: [40, 0], dial: [118, 0], movement: [112, 0],
@@ -298,6 +298,19 @@
       it.shelfLen = it.w;
       it.shelf.style.strokeDasharray = it.w;
     });
+    // размерная линия Ø корпуса (только горизонтальный разлёт)
+    lay.dim = null;
+    if (lay.mode === 'land') {
+      var cTop = toView(lay, 'case', -R, -R), cBot = toView(lay, 'case', -R, R);
+      var dx = cTop[0] - 26;
+      var dg = el('g', { 'class': 'co-dimg', opacity: 0 }, calloutsG);
+      var y1 = toView(lay, 'case', 0, -R)[1], y2 = toView(lay, 'case', 0, R)[1];
+      el('path', { 'class': 'co-dim', d: 'M' + r2(dx - 8) + ' ' + r2(y1) + 'H' + r2(cTop[0] + 6) + 'M' + r2(dx - 8) + ' ' + r2(y2) + 'H' + r2(cBot[0] + 6) + 'M' + r2(dx) + ' ' + r2(y1) + 'V' + r2(y2) }, dg);
+      el('path', { 'class': 'co-dimarrow', d: 'M' + r2(dx) + ' ' + r2(y1) + 'l-4 12h8Z M' + r2(dx) + ' ' + r2(y2) + 'l-4 -12h8Z' }, dg);
+      var dt = el('text', { 'class': 'co-dimtext co-text', x: r2(dx - 8), y: r2((y1 + y2) / 2), transform: 'rotate(-90 ' + r2(dx - 8) + ' ' + r2((y1 + y2) / 2) + ')', 'text-anchor': 'middle' }, dg);
+      dt.textContent = 'Ø 39,0';
+      lay.dim = dg;
+    }
     var axLen = axis.getTotalLength();
     axis.style.strokeDasharray = '22 5 3 5';
     lay.axLen = axLen;
@@ -337,6 +350,7 @@
 
     // осевая и выноски
     if (lay.axis) lay.axis.style.opacity = r2(seg(p, 0.45, 0.7) * 0.6);
+    if (lay.dim) lay.dim.setAttribute('opacity', r2(seg(c, 0.55, 0.9)));
     var n = lay.items.length;
     lay.items.forEach(function (it, i) {
       var st = (i / n) * 0.5;
